@@ -1,21 +1,27 @@
 import requests
+import allure
 import pytest
 from data import data
+from urls import urls
+from helpers.base_helper import generate_random_string
 from helpers.courier_helper import (
-    generate_random_string,
     register_new_courier_and_return_login_password,
     login_courier,
     delete_courier
 )
 
+@allure.feature("Создание курьера")
 class TestCreateCourier:
+
+    @allure.title("Успешное создание курьера")
     def test_create_courier_success(self):
         courier_data = register_new_courier_and_return_login_password()
-        assert courier_data is not None, "Не удалось создать курьера"
+        assert courier_data is not None
         courier_id = login_courier(courier_data)
-        assert courier_id is not None, "Не удалось авторизоваться после создания"
+        assert courier_id is not None
         delete_courier(courier_id)
 
+    @allure.title("Создание двух одинаковых курьеров - ошибка 409")
     def test_create_two_identical_couriers_fails(self):
         courier_data = register_new_courier_and_return_login_password()
         assert courier_data is not None
@@ -25,28 +31,40 @@ class TestCreateCourier:
             "password": courier_data["password"],
             "firstName": courier_data["firstName"]
         }
-        response = requests.post(data.BASE_URL + data.COURIER_CREATE, json=payload)
+        response = requests.post(data.BASE_URL + urls.COURIER_CREATE, json=payload)
         assert response.status_code == 409
         assert response.json()["message"] == data.COURIER_CREATE_CONFLICT
         delete_courier(courier_id)
 
-    @pytest.mark.parametrize("missing_field,expected_status", [
-        ("login", 400),
-        ("password", 400),
-        ("firstName", 201)
-    ])
-    def test_create_courier_missing_field_fails(self, missing_field, expected_status):
-        full_payload = {
-            "login": generate_random_string(10),
+    @allure.title("Создание курьера без обязательного поля login - ошибка 400")
+    def test_create_courier_missing_login_fails(self):
+        payload = {
             "password": generate_random_string(10),
             "firstName": generate_random_string(10)
         }
-        del full_payload[missing_field]
-        response = requests.post(data.BASE_URL + data.COURIER_CREATE, json=full_payload)
-        assert response.status_code == expected_status
-        if expected_status == 400:
-            assert response.json()["message"] == data.COURIER_CREATE_MISSING_DATA
+        response = requests.post(data.BASE_URL + urls.COURIER_CREATE, json=payload)
+        assert response.status_code == 400
+        assert response.json()["message"] == data.COURIER_CREATE_MISSING_DATA
 
+    @allure.title("Создание курьера без обязательного поля password - ошибка 400")
+    def test_create_courier_missing_password_fails(self):
+        payload = {
+            "login": generate_random_string(10),
+            "firstName": generate_random_string(10)
+        }
+        response = requests.post(data.BASE_URL + urls.COURIER_CREATE, json=payload)
+        assert response.status_code == 400
+        assert response.json()["message"] == data.COURIER_CREATE_MISSING_DATA
+
+    @allure.title("Создание курьера без поля firstName - успех (поле необязательное)")
+    def test_create_courier_missing_first_name_success(self):
+        login = generate_random_string(10)
+        password = generate_random_string(10)
+        payload = {"login": login, "password": password}
+        response = requests.post(data.BASE_URL + urls.COURIER_CREATE, json=payload)
+        assert response.status_code == 201
+
+    @allure.title("Создание курьера с уже существующим логином - ошибка 409")
     def test_create_courier_with_existing_login_fails(self):
         courier_data = register_new_courier_and_return_login_password()
         assert courier_data is not None
@@ -56,7 +74,7 @@ class TestCreateCourier:
             "password": generate_random_string(10),
             "firstName": generate_random_string(10)
         }
-        response = requests.post(data.BASE_URL + data.COURIER_CREATE, json=new_payload)
+        response = requests.post(data.BASE_URL + urls.COURIER_CREATE, json=new_payload)
         assert response.status_code == 409
         assert response.json()["message"] == data.COURIER_CREATE_CONFLICT
         delete_courier(courier_id)

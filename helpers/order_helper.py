@@ -1,9 +1,7 @@
+# helpers/order_helper.py
 import random
 import string
-
-def generate_random_string(length):
-    letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for i in range(length))
+from helpers.base_helper import generate_random_string
 
 def generate_order_data():
     return {
