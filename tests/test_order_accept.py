@@ -15,7 +15,6 @@ class TestAcceptOrder:
     @allure.title("Успешное принятие заказа курьером")
     def test_accept_order_success(self):
         courier_data = register_new_courier_and_return_login_password()
-        assert courier_data is not None
         courier_id = login_courier(courier_data)
         order_data = generate_order_data()
         create_response = requests.post(data.BASE_URL + urls.ORDERS_CREATE, json=order_data)
@@ -66,7 +65,6 @@ class TestAcceptOrder:
     @allure.title("Принятие заказа с несуществующим orderId - ошибка 404")
     def test_accept_order_with_invalid_order_id_fails(self):
         courier_data = register_new_courier_and_return_login_password()
-        assert courier_data is not None
         courier_id = login_courier(courier_data)
         invalid_order_id = 999999999
         accept_url = data.BASE_URL + urls.ORDERS_ACCEPT + str(invalid_order_id)

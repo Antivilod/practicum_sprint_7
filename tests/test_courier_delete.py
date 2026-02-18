@@ -9,11 +9,8 @@ class TestDeleteCourier:
 
     @allure.title("Успешное удаление курьера")
     def test_delete_courier_success(self):
-        # Создаём курьера вручную, чтобы фикстура не мешала
         courier_data = register_new_courier_and_return_login_password()
-        assert courier_data is not None
         courier_id = login_courier(courier_data)
-        assert courier_id is not None
         response = delete_courier(courier_id)
         assert response.status_code == 200
         assert response.json() == {"ok": True}

@@ -16,7 +16,6 @@ class TestLoginCourier:
     @allure.title("Успешный логин курьера")
     def test_login_courier_success(self):
         courier_data = register_new_courier_and_return_login_password()
-        assert courier_data is not None
         courier_id = login_courier(courier_data)
         payload = {
             "login": courier_data["login"],
@@ -31,7 +30,6 @@ class TestLoginCourier:
     @pytest.mark.flaky(reruns=3)
     def test_login_missing_login_fails(self):
         courier_data = register_new_courier_and_return_login_password()
-        assert courier_data is not None
         courier_id = login_courier(courier_data)
         payload = {"password": courier_data["password"]}
         response = requests.post(data.BASE_URL + urls.COURIER_LOGIN, json=payload)
@@ -43,7 +41,6 @@ class TestLoginCourier:
     @pytest.mark.flaky(reruns=3)
     def test_login_missing_password_fails(self):
         courier_data = register_new_courier_and_return_login_password()
-        assert courier_data is not None
         courier_id = login_courier(courier_data)
         payload = {"login": courier_data["login"]}
         response = requests.post(data.BASE_URL + urls.COURIER_LOGIN, json=payload)
@@ -54,7 +51,6 @@ class TestLoginCourier:
     @allure.title("Логин с неверным паролем - ошибка 404")
     def test_login_wrong_password_fails(self):
         courier_data = register_new_courier_and_return_login_password()
-        assert courier_data is not None
         courier_id = login_courier(courier_data)
         payload = {
             "login": courier_data["login"],

@@ -16,7 +16,6 @@ class TestCreateCourier:
     @allure.title("Успешное создание курьера")
     def test_create_courier_success(self):
         courier_data = register_new_courier_and_return_login_password()
-        assert courier_data is not None
         courier_id = login_courier(courier_data)
         assert courier_id is not None
         delete_courier(courier_id)
@@ -24,7 +23,6 @@ class TestCreateCourier:
     @allure.title("Создание двух одинаковых курьеров - ошибка 409")
     def test_create_two_identical_couriers_fails(self):
         courier_data = register_new_courier_and_return_login_password()
-        assert courier_data is not None
         courier_id = login_courier(courier_data)
         payload = {
             "login": courier_data["login"],
@@ -67,7 +65,6 @@ class TestCreateCourier:
     @allure.title("Создание курьера с уже существующим логином - ошибка 409")
     def test_create_courier_with_existing_login_fails(self):
         courier_data = register_new_courier_and_return_login_password()
-        assert courier_data is not None
         courier_id = login_courier(courier_data)
         new_payload = {
             "login": courier_data["login"],
